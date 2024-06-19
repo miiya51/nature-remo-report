@@ -1,0 +1,36 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: $POSTGRES_DB #DB設定　以下３行適宜変更
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+    ports:
+      - "5432:5432" #待受のポート番号を変更したい場合は「:」の左側を変更
+  grafana:
+    image: grafana/grafana-enterprise
+    container_name: grafana
+    restart: unless-stopped
+    volumes:
+      - "grafana_storage:/var/lib/grafana"
+    ports:
+      - "3000:3000" #待受のポート番号を変更したい場合は「:」の左側を変更
+  nature_remo:
+    container_name: nature_remo
+    build: .
+    environment:
+      - remo_token=$REMO_TOKEN
+      - db_user=$DB_USER
+      - db_password=$DB_PASSWORD
+      - db_server=$DB_SERVER #ex)192.168.1.1:5432, localhost:5432
+      - db_name=$DB_NAME
+      - interval_time=$INTERVAL_TIME #室温を取得する時間の間隔（分）
+    volumes:
+      - ./src:/root/src
+volumes: # データの永続化
+  grafana_storage: {}
+  postgres_data: {}
